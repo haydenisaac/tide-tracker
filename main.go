@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -12,11 +13,14 @@ import (
 
 func main() {
 
-	webpage := scrape.New("https://www.tidetimes.org.uk/" + os.Getenv("LOCATION"))
+	url := "https://www.tidetimes.org.uk/" + os.Getenv("LOCATION")
+	webpage := scrape.New(url)
 	allText := webpage.GetText()
 	text := getCurrentTide(allText)
-
-	if isHigh(10, text) {
+	if text == "" {
+		log.Fatalf("no text found from %s", url)
+	}
+	if isHigh(5, text) {
 		e := smtp.New(os.Getenv("USER"), os.Getenv("PASSWORD"))
 		notifyAll(e, strings.Fields(os.Getenv("RECIPIENTS")), text)
 	}
