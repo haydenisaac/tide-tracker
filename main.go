@@ -20,7 +20,11 @@ func main() {
 	if text == "" {
 		log.Fatalf("no text found from %s", url)
 	}
-	if isHigh(5, text) {
+	height, err := strconv.Atoi(os.Getenv("HEIGHT_TRIGGER"))
+	if err != nil {
+		log.Fatalf("parsing heigh: %v", err)
+	}
+	if isHigh(float64(height), text) {
 		e := smtp.New(os.Getenv("USER"), os.Getenv("PASSWORD"))
 		notifyAll(e, strings.Fields(os.Getenv("RECIPIENTS")), text)
 	}

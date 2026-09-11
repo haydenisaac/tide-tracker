@@ -3,6 +3,7 @@ name: Go
 on:
   schedule:
     - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
 
@@ -22,4 +23,5 @@ jobs:
         PASSWORD: ${{secrets.PASSWORD}}
         RECIPIENTS: ${{vars.RECIPIENTS}}
         LOCATION: ${{vars.LOCATION}}
+        HEIGHT_TRIGGER: ${{vars.HEIGHT_TRIGGER}}
       run: go run .
