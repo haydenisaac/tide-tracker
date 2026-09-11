@@ -48,7 +48,7 @@ func getCurrentTide(allText []string) string {
 }
 
 func isHigh(high float64, text string) bool {
-	re := regexp.MustCompile(`\d{1,2}\.\d{2}`)
+	re := regexp.MustCompile(`\d{1,2}\.\d{1,2}`)
 	currentHeight, err := strconv.ParseFloat(re.FindString(text), 2)
 	if err != nil {
 		log.Fatalf("checking height. can't parse %s: %v", text, err)
