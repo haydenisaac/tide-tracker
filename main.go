@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -11,44 +10,16 @@ import (
 	"tide-tracker/smtp"
 )
 
-type config struct {
-	User       string
-	Password   string
-	Recipients []string
-	Location   string
-	MinHeight  float64
-}
-
 func main() {
-	config := loadConfig()
 
-	webpage := scrape.New("https://www.tidetimes.org.uk/" + config.Location)
+	webpage := scrape.New("https://www.tidetimes.org.uk/" + os.Getenv("LOCATION"))
 	allText := webpage.GetText()
 	text := getCurrentTide(allText)
 
-	if isHigh(config.MinHeight, text) {
-		e := smtp.New(config.User, config.Password)
-		notifyAll(e, config.Recipients, text)
+	if isHigh(10, text) {
+		e := smtp.New(os.Getenv("USER"), os.Getenv("PASSWORD"))
+		notifyAll(e, strings.Fields(os.Getenv("RECIPIENTS")), text)
 	}
-
-}
-
-func loadConfig() config {
-	file, err := os.Open("./config.json")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
-
-	conf := config{}
-	err = decoder.Decode(&conf)
-	if err != nil {
-		panic(err)
-	}
-
-	return conf
 }
 
 func notifyAll(e *smtp.Client, recipients []string, text string) {
