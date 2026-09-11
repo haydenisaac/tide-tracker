@@ -22,7 +22,7 @@ func main() {
 	}
 	height, err := strconv.Atoi(os.Getenv("HEIGHT_TRIGGER"))
 	if err != nil {
-		log.Fatalf("parsing heigh: %v", err)
+		log.Fatalf("parsing height: %v", err)
 	}
 	if isHigh(float64(height), text) {
 		e := smtp.New(os.Getenv("USER"), os.Getenv("PASSWORD"))
@@ -51,7 +51,7 @@ func isHigh(high float64, text string) bool {
 	re := regexp.MustCompile(`\d{1,2}\.\d{2}`)
 	currentHeight, err := strconv.ParseFloat(re.FindString(text), 2)
 	if err != nil {
-		panic(err)
+		log.Fatalf("checking height. can't parse %s: %v", text, err)
 	}
 	return currentHeight > high
 }
