@@ -1,14 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"tide-tracker/email"
 	"tide-tracker/scrape"
-	"tide-tracker/smtp"
 )
 
 func main() {
@@ -23,15 +22,8 @@ func main() {
 		log.Fatalf("parsing height: %v", err)
 	}
 	if isHigh(float64(height), text) {
-		e := smtp.New(os.Getenv("USER"), os.Getenv("PASSWORD"))
-		notifyAll(e, strings.Fields(os.Getenv("RECIPIENTS")), text)
-	}
-}
-
-func notifyAll(e *smtp.Client, recipients []string, text string) {
-	for _, recipient := range recipients {
-		fmt.Printf("notified %s\n", recipient)
-		e.Notify(recipient, text)
+		e := email.New(os.Getenv("USER"), os.Getenv("PASSWORD"))
+		e.NotifyAll(strings.Fields(os.Getenv("RECIPIENTS")), text, "Tide Times")
 	}
 }
 
