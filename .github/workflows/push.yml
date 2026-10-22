@@ -21,7 +21,7 @@ jobs:
       env:
         USER: ${{secrets.USER}}
         PASSWORD: ${{secrets.PASSWORD}}
-        RECIPIENTS: ${{vars.RECIPIENTS}}
+        RECIPIENTS: ${{secrets.RECIPIENTS}}
         LOCATION: ${{vars.LOCATION}}
         HEIGHT_TRIGGER: ${{vars.HEIGHT_TRIGGER}}
       run: go run .

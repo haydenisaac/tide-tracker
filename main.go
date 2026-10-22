@@ -14,11 +14,9 @@ import (
 func main() {
 
 	url := "https://www.tidetimes.org.uk/" + os.Getenv("LOCATION")
-	webpage := scrape.New(url)
-	allText := webpage.GetText()
-	text := getCurrentTide(allText)
-	if text == "" {
-		log.Fatalf("no text found from %s", url)
+	text, err := scrape.FindPhrase(url, "Right now")
+	if err != nil {
+		panic(err)
 	}
 	height, err := strconv.Atoi(os.Getenv("HEIGHT_TRIGGER"))
 	if err != nil {
@@ -35,16 +33,6 @@ func notifyAll(e *smtp.Client, recipients []string, text string) {
 		fmt.Printf("notified %s\n", recipient)
 		e.Notify(recipient, text)
 	}
-}
-
-func getCurrentTide(allText []string) string {
-	for _, text := range allText {
-		if strings.Contains(text, "Right now") {
-			return text
-		}
-	}
-
-	return ""
 }
 
 func isHigh(high float64, text string) bool {
