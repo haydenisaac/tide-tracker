@@ -1,37 +1,47 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
-	"regexp"
-	"strconv"
-	"strings"
 	"tide-tracker/email"
-	"tide-tracker/scrape"
+	"tide-tracker/tidetimes"
+
+	"log/slog"
 )
+
+type config struct {
+	location   string
+	trigger    float64
+	password   string
+	user       string
+	recipients []string
+}
 
 func main() {
 
-	url := "https://www.tidetimes.org.uk/" + os.Getenv("LOCATION")
-	text, err := scrape.FindPhrase(url, "Right now")
+	c, err := loadConfig()
 	if err != nil {
-		panic(err)
+		log.Fatalf("load config: %v", err)
 	}
-	height, err := strconv.Atoi(os.Getenv("HEIGHT_TRIGGER"))
+
+	err = run(c)
+
 	if err != nil {
-		log.Fatalf("parsing height: %v", err)
-	}
-	if isHigh(float64(height), text) {
-		e := email.New(os.Getenv("USER"), os.Getenv("PASSWORD"))
-		e.NotifyAll(strings.Fields(os.Getenv("RECIPIENTS")), text, "Tide Times")
+		log.Fatalf("run: %v", err)
 	}
 }
 
-func isHigh(high float64, text string) bool {
-	re := regexp.MustCompile(`\d{1,2}\.\d{1,2}`)
-	currentHeight, err := strconv.ParseFloat(re.FindString(text), 2)
+func run(c config) error {
+	predictedHeight, err := tidetimes.GetHeight(c.location)
 	if err != nil {
-		log.Fatalf("checking height. can't parse %s: %v", text, err)
+		return fmt.Errorf("get predicted tide height: %w", err)
 	}
-	return currentHeight > high
+
+	if c.trigger < predictedHeight {
+		message := predictedHeightMessage(predictedHeight)
+		slog.Info("height is larger than the trigger - sending email.", "message", message, "recipients", len(c.recipients))
+		e := email.New(c.user, c.password)
+		e.NotifyAll(c.recipients, message, "Possible Overtop")
+	}
+	return nil
 }
